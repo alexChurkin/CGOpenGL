@@ -30,7 +30,11 @@ namespace BasicTriangle
                 outputColor = vec4(1, 0.0, 0.0, 1.0);
             }
         ";
-        //Точки сердца в нормализованных координатах (x и y от -1 до 1)
+        //Точки сердца в нормализованных координатах (x, y, z от -1 до 1)
+        //x1, y1, z1, w1,
+        //x2, y2, z2, w2,
+        //...........
+        //xm, ym, zm, wm
         float[] Points;
         //Треугольники, представленные номерами вершин каждый
         //в виде v11, v12, v13 <- первый треугольник
@@ -52,23 +56,16 @@ namespace BasicTriangle
         protected override void OnLoad(EventArgs e)
         {
             ObjReader r = new ObjReader();
-            ObjOutput o = r.ReadObj("Heart3DModel.obj");
+            ObjResource objRes = r.ReadObj("Heart3DModel.obj");
 
-            Vertex[] vertices = o.vertices;
-            //TODO Use later
-            //Normal[] normals = o.normals;
+            //Vertex[] vertices = o.vertices;
+            //TODO Использовать позже
+            //Normal[] normals = objRes.normals;
 
-            //Запись вершин в Points
-            Points = new float[vertices.Length * 4];
-            for (int i = 0, j = 0; i < vertices.Length; i++, j += 4)
-            {
-                Points[j] = vertices[i].x;
-                Points[j + 1] = vertices[i].y;
-                Points[j + 2] = vertices[i].z;
-                Points[j + 3] = vertices[i].w;
-            }
-            //Запись треугольников из вершин в elements
-            Elements = o.triangles;
+            //Получение вершин в нужном для отрисовки формате
+            Points = objRes.GetFloatPoints();
+            //Получение треугольников, составленных из вершин
+            Elements = objRes.triangles;
 
             //Загрузка исходного кода вершинного шейдера и его компиляция
             VertexShader = GL.CreateShader(ShaderType.VertexShader);

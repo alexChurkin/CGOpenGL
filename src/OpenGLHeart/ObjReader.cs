@@ -4,7 +4,7 @@ using System.IO;
 
 namespace BasicTriangle
 {
-    public class ObjOutput
+    public class ObjResource
     {
         //Вершины объекта в виде списка
         public Vertex[] vertices { get; set; }
@@ -18,17 +18,35 @@ namespace BasicTriangle
         //       vk1, vk2, vk3 <- последний треугольник
         public int[] triangles { get; set; }
 
-        public ObjOutput(Vertex[] vertices, Normal[] normals, int[] triangles)
+        public ObjResource(Vertex[] vertices, Normal[] normals, int[] triangles)
         {
             this.vertices = vertices;
             this.normals = normals;
             this.triangles = triangles;
         }
+
+        //Получение всех точек в формате:
+        //x1, y1, z1, w1,
+        //x2, y2, z2, w2,
+        //...........
+        //xm, ym, zm, wm
+        public float[] GetFloatPoints()
+        {
+            float[] points = new float[vertices.Length * 4];
+            for (int i = 0, j = 0; i < vertices.Length; i++, j += 4)
+            {
+                points[j] = vertices[i].x;
+                points[j + 1] = vertices[i].y;
+                points[j + 2] = vertices[i].z;
+                points[j + 3] = vertices[i].w;
+            }
+            return points;
+        }
     }
 
     public class ObjReader
     {
-        public ObjOutput ReadObj(string path)
+        public ObjResource ReadObj(string path)
         {
             List<Vertex> objVertices = new List<Vertex>();
             List<Normal> objNormals = new List<Normal>();
@@ -68,11 +86,10 @@ namespace BasicTriangle
             Normal[] normalsSorted = new Normal[objNormals.Count];
             //Список треугольников
             //Треугольники представлены списками вершин
-            //в виде v11 v12 v13
-            //       v21 v22 v23
+            //в виде v11, v12, v13, <- треугольник 1
+            //       v21, v22, v23, <- треугольник 2
             //       ...........
-            //       vk1 vk2 vk3
-
+            //       vk1, vk2, vk3  <- треугольник k (последний)
             List<int> objTriangles = new List<int>();
 
             //Считывание треугольников
@@ -108,7 +125,7 @@ namespace BasicTriangle
                     objTriangles.Add(v3);
                 }
             }
-            return new ObjOutput(
+            return new ObjResource(
                 objVertices.ToArray(),
                 normalsSorted,
                 objTriangles.ToArray());
