@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace BasicTriangle
+namespace OpenGLHeart
 {
     public class ObjResource
     {

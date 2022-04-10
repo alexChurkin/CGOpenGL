@@ -3,7 +3,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 
-namespace BasicTriangle
+namespace OpenGLHeart
 {
     sealed class Program : GameWindow
     {
@@ -13,9 +13,11 @@ namespace BasicTriangle
 
             layout(location = 0) in vec4 position;
 
+            uniform mat4 scaleMatrix;
+
             void main(void)
             {
-                gl_Position = position;
+                gl_Position = position * scaleMatrix;
             }
         ";
 
@@ -137,8 +139,22 @@ namespace BasicTriangle
             base.OnResize(e);
         }
 
+        bool directionMore = false;
+        float iScale = 2000;
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            //Уменьшение на 1
+            if (!directionMore)
+                iScale--;
+            //Увеличение на 1
+            else
+                iScale++;
+            if (iScale == 1700 || iScale == 2000)
+                directionMore = !directionMore;
+
+            float fScale = iScale / 2000.0f;
+
             //Очистка цветового буфера
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
@@ -150,6 +166,13 @@ namespace BasicTriangle
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementsBufferObject);
             //Использование ранее скомпилированной шейдерной программы
             GL.UseProgram(ShaderProgram);
+
+            //Отыскание в шейдерной программе позиции uniform
+            int unifLoc = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
+            //Матрица масштабирования
+            Matrix4 scale = Matrix4.CreateScale(fScale, fScale, fScale);
+            //Отправка матрицы в шейдерную программу
+            GL.UniformMatrix4(unifLoc, true, ref scale);
 
             //Отрисовка треугольников
             GL.DrawElements(

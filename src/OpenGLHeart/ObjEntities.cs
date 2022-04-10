@@ -1,4 +1,4 @@
-﻿namespace BasicTriangle
+﻿namespace OpenGLHeart
 {
     //Вершина
     public class Vertex
