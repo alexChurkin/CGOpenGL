@@ -7,23 +7,38 @@ namespace OpenGLHeart
 {
     sealed class Program : GameWindow
     {
-        //Простейший вершинный шейдер. Just passes through the position vector.
+        //Вершинный шейдер
         const string VertexShaderSource = @"
             #version 330
 
+            //Входные и uniform-данные шейдера
+            //location - номер аргумента
+
             layout(location = 0) in vec4 position;
+            layout(location = 1) in vec3 normal;
 
             uniform mat4 scaleMatrix;
+
+            //Выходные данные
+
+            out vec3 outNormal;
 
             void main(void)
             {
                 gl_Position = position * scaleMatrix;
+                outNormal = normal;
             }
         ";
 
-        //Простой фрагментный шейдер. Просто постоянный красный цвет
+        //Фрагментный шейдер. Реализует освещение (прожектор)
         const string FragmentShaderSource = @"
             #version 330
+
+            //На вход нормаль к вершине
+
+            in vec3 normal;
+
+            //На выход - итоговый цвет
 
             out vec4 outputColor;
 
@@ -32,12 +47,15 @@ namespace OpenGLHeart
                 outputColor = vec4(1, 0.0, 0.0, 1.0);
             }
         ";
-        //Точки сердца в нормализованных координатах (x, y, z от -1 до 1)
-        //x1, y1, z1, w1,
-        //x2, y2, z2, w2,
+
+        //Все вершины с их нормалями в формате:
+        //x1, y1, z1, w1, nx1, ny1, nz1,
+        //x2, y2, z2, w2, nx2, ny2, nz2,
         //...........
-        //xm, ym, zm, wm
-        float[] Points;
+        //xm, ym, zm, wm, nxn, nyn, nzn
+        //Первые 4 числа - описание вершины, следующие 3 - нормали, и т. д.
+        float[] VerticesWithNormals;
+
         //Треугольники, представленные номерами вершин каждый
         //в виде v11, v12, v13 <- первый треугольник
         //       v21, v22, v23 <- следующий
@@ -60,12 +78,8 @@ namespace OpenGLHeart
             ObjReader r = new ObjReader();
             ObjResource objRes = r.ReadObj("Heart3DModel.obj");
 
-            //Vertex[] vertices = o.vertices;
-            //TODO Использовать позже
-            //Normal[] normals = objRes.normals;
-
             //Получение вершин в нужном для отрисовки формате
-            Points = objRes.GetFloatPoints();
+            VerticesWithNormals = objRes.ObtainVerticesWithNormals();
             //Получение треугольников, составленных из вершин
             Elements = objRes.triangles;
 
@@ -90,17 +104,32 @@ namespace OpenGLHeart
             VertexBufferObject = GL.GenBuffer();
             //Бинд VBO и копирование данных вершин в буфер
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, Points.Length * sizeof(float), Points, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, VerticesWithNormals.Length * sizeof(float), VerticesWithNormals, BufferUsageHint.StaticDraw);
 
-            //Получение position location из программы
+            //Получение положения position из программы
             var positionLocation = GL.GetAttribLocation(ShaderProgram, "position");
+            var normalLocation = GL.GetAttribLocation(ShaderProgram, "normal");
 
             //Создание объекта массива вершин (VAO) для программы
             VertexArrayObject = GL.GenVertexArray();
-            //Бинд VAO и установка атрибута position
+            //Бинд VAO
             GL.BindVertexArray(VertexArrayObject);
-            GL.VertexAttribPointer(positionLocation, 4, VertexAttribPointerType.Float, false, 0, 0);
+
+            /* Указание OpenGL, как интерпретировать float массив вершин,
+            т.к. там хранятся ещё и координаты векторов нормалей: */
             GL.EnableVertexAttribArray(positionLocation);
+            GL.EnableVertexAttribArray(normalLocation);
+
+            //Первым аргументом в шейдер по 4 float-а вершин (x,y,z,w) с шагом 7
+            //без смещения от начала
+            GL.VertexAttribPointer(positionLocation, 4, VertexAttribPointerType.Float,
+                    false, 7 * sizeof(float), 0);
+
+            //Вторым аргументом в шейдер по 3 float-а вершин (x,y,z,w)
+            //с шагом 7 со смещением 4 от начала
+            GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float,
+                    false, 7 * sizeof(float), 4 * sizeof(float));
+            //------------------------------------------------------
 
             //Создание объекта-буфера элементов для треугольников
             ElementsBufferObject = GL.GenBuffer();
@@ -139,19 +168,19 @@ namespace OpenGLHeart
             base.OnResize(e);
         }
 
-        bool directionMore = false;
+        bool upscaling = false;
         float iScale = 2000;
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             //Уменьшение на 1
-            if (!directionMore)
+            if (!upscaling)
                 iScale--;
             //Увеличение на 1
             else
                 iScale++;
             if (iScale == 1700 || iScale == 2000)
-                directionMore = !directionMore;
+                upscaling = !upscaling;
 
             float fScale = iScale / 2000.0f;
 
@@ -164,15 +193,16 @@ namespace OpenGLHeart
             GL.BindVertexArray(VertexArrayObject);
             //Бинд EBO
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementsBufferObject);
-            //Использование ранее скомпилированной шейдерной программы
-            GL.UseProgram(ShaderProgram);
 
             //Отыскание в шейдерной программе позиции uniform
             int unifLoc = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
-            //Матрица масштабирования
+            //Создание матрицы масштабирования
             Matrix4 scale = Matrix4.CreateScale(fScale, fScale, fScale);
-            //Отправка матрицы в шейдерную программу
+            //Привязка матрицы ко входу шейдерной программы
             GL.UniformMatrix4(unifLoc, true, ref scale);
+
+            //Использование ранее скомпилированной шейдерной программы
+            GL.UseProgram(ShaderProgram);
 
             //Отрисовка треугольников
             GL.DrawElements(

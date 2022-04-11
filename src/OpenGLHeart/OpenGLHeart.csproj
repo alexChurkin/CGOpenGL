@@ -37,7 +37,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Time.cs" />
     <Compile Include="ObjReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ObjEntities.cs" />

@@ -25,22 +25,27 @@ namespace OpenGLHeart
             this.triangles = triangles;
         }
 
-        //Получение всех точек в формате:
-        //x1, y1, z1, w1,
-        //x2, y2, z2, w2,
+        //Получение всех вершин с их нормалями в формате:
+        //x1, y1, z1, w1, nx1, ny1, nz1,
+        //x2, y2, z2, w2, nx2, ny2, nz2,
         //...........
-        //xm, ym, zm, wm
-        public float[] GetFloatPoints()
+        //xm, ym, zm, wm, nxn, nyn, nzn
+        //Первые 4 числа - описание вершины, следующие 3 - нормали, и т. д.
+        public float[] ObtainVerticesWithNormals()
         {
-            float[] points = new float[vertices.Length * 4];
-            for (int i = 0, j = 0; i < vertices.Length; i++, j += 4)
+            float[] result = new float[vertices.Length * 7];
+            for (int i = 0, j = 0; i < vertices.Length; i++, j += 7)
             {
-                points[j] = vertices[i].x;
-                points[j + 1] = vertices[i].y;
-                points[j + 2] = vertices[i].z;
-                points[j + 3] = vertices[i].w;
+                result[j] = vertices[i].x;
+                result[j + 1] = vertices[i].y;
+                result[j + 2] = vertices[i].z;
+                result[j + 3] = vertices[i].w;
+
+                result[j + 4] = normals[i].x;
+                result[j + 5] = normals[i].y;
+                result[j + 6] = normals[i].z;
             }
-            return points;
+            return result;
         }
     }
 
