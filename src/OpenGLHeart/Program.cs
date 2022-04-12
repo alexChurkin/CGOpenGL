@@ -20,6 +20,8 @@ namespace OpenGLHeart
             layout(location = 1) in vec3 normal;
 
             uniform mat4 model;
+            uniform mat4 view;
+            uniform mat4 projection;
 
             //Выходные данные
 
@@ -28,11 +30,12 @@ namespace OpenGLHeart
 
             void main(void)
             {
-                gl_Position = vec4(position, 1.0) * model;
+                gl_Position = vec4(position, 1.0) * model * view * projection;
                 
                 frPos = vec3(model * vec4(position, 1.0));
 
-                frNormal = normal;
+                //frNormal = normal;
+                frNormal = mat3(transpose(inverse(model))) * normal;  
             }
         ";
 
@@ -97,8 +100,8 @@ namespace OpenGLHeart
         protected override void OnLoad(EventArgs e)
         {
             ObjReader r = new ObjReader();
-            ObjResource objRes = r.ReadObj("NiceHeart.obj");
-            //ObjResource objRes = r.ReadObj(@"C:\Users\lxchu\Desktop\old.obj");
+            //ObjResource objRes = r.ReadObj("NiceHeart.obj");
+            ObjResource objRes = r.ReadObj(@"C:\Users\lxchu\Desktop\cube.obj");
 
             //Получение вершин в нужном для отрисовки формате
             VerticesWithNormals = objRes.ObtainVerticesWithNormals();
@@ -237,20 +240,31 @@ namespace OpenGLHeart
 
             //Создание матрицы масштабирования
             Matrix4 scale = Matrix4.CreateScale(fScale, fScale, fScale);
-
-            //Matrix4 rotation = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(iRot / 40.0f));
-
-            Matrix4 model = scale; //* rotation;
-
-            //Привязка матрицы к шейдерной программе
+            Matrix4 rotation = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(iRot / 40.0f));
+            //Привязка матрицы периодического увеличения и поворота к шейдерной программе
+            Matrix4 model = rotation * scale;
             int loc1 = GL.GetUniformLocation(ShaderProgram, "model");
             GL.UniformMatrix4(loc1, true, ref model);
+
+            Vector3 position = new Vector3(0.0f, 0.0f, 3.0f);
+            Vector3 front = new Vector3(0.0f, 0.0f, -1.0f);
+            Vector3 up = new Vector3(0.0f, 1.0f, 0.0f);
+            Matrix4 view = Matrix4.LookAt(position, position + front, up);
+
+            int loc2 = GL.GetUniformLocation(ShaderProgram, "view");
+            GL.UniformMatrix4(loc2, true, ref view);
+
+            //Привязка матрицы проекции к шейдерной программе
+            Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(
+                MathHelper.DegreesToRadians(45.0f), Width / Height, 2.9f, 100.0f);
+            int loc3 = GL.GetUniformLocation(ShaderProgram, "projection");
+            GL.UniformMatrix4(loc3, true, ref projection);
 
             //Создание точки, откуда идёт освещение
             Vector3 lightPos = new Vector3(2.0f, -1.0f, 2.0f);
             //Привязка точки к шейдерной программе
-            int loc2 = GL.GetUniformLocation(ShaderProgram, "lightPos");
-            GL.Uniform3(loc2, ref lightPos);
+            int loc4 = GL.GetUniformLocation(ShaderProgram, "lightPos");
+            GL.Uniform3(loc4, ref lightPos);
 
             //Matrix4 viewMatrix = Matrix4.LookAt(new Vector3(0.0f, 0.0f, 0.9f),//откуда смотреть? (точка)
             //new Vector3(0.0f, 0.0f, 0.0f),//куда смотреть? (точка)
