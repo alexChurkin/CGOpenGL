@@ -98,8 +98,7 @@ namespace OpenGLHeart
         protected override void OnLoad(EventArgs e)
         {
             ObjReader r = new ObjReader();
-            ObjResource objRes = r.ReadObj("Heart3DModel.obj");
-            //ObjResource objRes = r.ReadObj("C:\\Users\\lxchu\\Desktop\\untitled.obj");
+            ObjResource objRes = r.ReadObj("NiceHeart.obj");
 
             //Получение вершин в нужном для отрисовки формате
             VerticesWithNormals = objRes.ObtainVerticesWithNormals();
@@ -160,10 +159,14 @@ namespace OpenGLHeart
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementsBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, Elements.Length * sizeof(int), Elements, BufferUsageHint.StaticDraw);
 
-            // Очистка цвета (установка серого)
+            //Очистка цвета (установка серого)
             GL.ClearColor(0.15f, 0.15f, 0.15f, 0.0f);
 
             GL.Enable(EnableCap.CullFace);
+            
+            //Делает освещение интереснее
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlphaSaturate, BlendingFactorDest.One);
 
             base.OnLoad(e);
         }
@@ -226,7 +229,7 @@ namespace OpenGLHeart
             GL.UniformMatrix4(loc1, true, ref scale);
 
             //Создание вектора, задающего точку, откуда идёт освещение
-            Vector3 lightPos = new Vector3(-2.0f, 2.0f, 2.0f);
+            Vector3 lightPos = new Vector3(2.0f, 0f, 2.0f);
             //Привязка точки ко входу шейдерной программы
             int loc2 = GL.GetUniformLocation(ShaderProgram, "lightPos");
             GL.Uniform3(loc2, ref lightPos);
