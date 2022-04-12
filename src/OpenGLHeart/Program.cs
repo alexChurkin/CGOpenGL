@@ -11,9 +11,11 @@ namespace OpenGLHeart
         const string VertexShaderSource = @"
             #version 330
 
-            //Входные и uniform-данные шейдера
+            //На вход - координаты вершины и нормали к ней
+            //и матрица масштабирования
             //location - номер аргумента
 
+            //КОРРЕКТНЫ
             layout(location = 0) in vec4 position;
             layout(location = 1) in vec3 normal;
 
@@ -21,12 +23,17 @@ namespace OpenGLHeart
 
             //Выходные данные
 
-            out vec3 outNormal;
+            out vec3 frPos;
+            out vec3 frNormal;
 
             void main(void)
             {
-                gl_Position = position * scaleMatrix;
-                outNormal = normal;
+                vec4 worldCoords = scaleMatrix * position;
+
+                gl_Position = worldCoords;
+                
+                frPos = vec3(worldCoords);
+                frNormal = normal;
             }
         ";
 
@@ -34,17 +41,32 @@ namespace OpenGLHeart
         const string FragmentShaderSource = @"
             #version 330
 
-            //На вход нормаль к вершине
+            //На вход нормаль к вершине и положение света
 
-            in vec3 normal;
+            in vec3 frPos;
+            in vec3 frNormal;
+
+            uniform vec3 lightPos;
 
             //На выход - итоговый цвет
 
-            out vec4 outputColor;
+            out vec4 finalColor;
 
             void main(void)
             {
-                outputColor = vec4(1, 0.0, 0.0, 1.0);
+                vec3 heartColor = vec3(1.0, 0.0, 0.0);
+                vec3 lightColor = vec3(1.0, 1.0, 1.0);
+
+                vec3 norm = normalize(frNormal);
+                vec3 lightDir = normalize(lightPos - frPos);
+
+                float diff = max(dot(norm, lightDir), 0.0);
+
+                vec3 ambient = 0.12 * lightColor;
+                vec3 diffuse = diff * lightColor;
+
+                vec3 result = (ambient + diffuse) * heartColor;
+                finalColor = vec4(result, 1.0);
             }
         ";
 
@@ -77,6 +99,7 @@ namespace OpenGLHeart
         {
             ObjReader r = new ObjReader();
             ObjResource objRes = r.ReadObj("Heart3DModel.obj");
+            //ObjResource objRes = r.ReadObj("C:\\Users\\lxchu\\Desktop\\untitled.obj");
 
             //Получение вершин в нужном для отрисовки формате
             VerticesWithNormals = objRes.ObtainVerticesWithNormals();
@@ -137,8 +160,10 @@ namespace OpenGLHeart
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementsBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, Elements.Length * sizeof(int), Elements, BufferUsageHint.StaticDraw);
 
-            // Очистка цвета (установка синего)
-            GL.ClearColor(0.0f, 0.0f, 0.5f, 0.0f);
+            // Очистка цвета (установка серого)
+            GL.ClearColor(0.15f, 0.15f, 0.15f, 0.0f);
+
+            GL.Enable(EnableCap.CullFace);
 
             base.OnLoad(e);
         }
@@ -194,12 +219,17 @@ namespace OpenGLHeart
             //Бинд EBO
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementsBufferObject);
 
-            //Отыскание в шейдерной программе позиции uniform
-            int unifLoc = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
             //Создание матрицы масштабирования
             Matrix4 scale = Matrix4.CreateScale(fScale, fScale, fScale);
             //Привязка матрицы ко входу шейдерной программы
-            GL.UniformMatrix4(unifLoc, true, ref scale);
+            int loc1 = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
+            GL.UniformMatrix4(loc1, true, ref scale);
+
+            //Создание вектора, задающего точку, откуда идёт освещение
+            Vector3 lightPos = new Vector3(-2.0f, 2.0f, 2.0f);
+            //Привязка точки ко входу шейдерной программы
+            int loc2 = GL.GetUniformLocation(ShaderProgram, "lightPos");
+            GL.Uniform3(loc2, ref lightPos);
 
             //Использование ранее скомпилированной шейдерной программы
             GL.UseProgram(ShaderProgram);

@@ -88,7 +88,7 @@ namespace OpenGLHeart
             }
 
             //Массив нормалей к ним (уже отсортированный, каждой вершине нормаль)
-            Normal[] normalsSorted = new Normal[objNormals.Count];
+            Normal[] normalsSorted = new Normal[objVertices.Count];
             //Список треугольников
             //Треугольники представлены списками вершин
             //в виде v11, v12, v13, <- треугольник 1
