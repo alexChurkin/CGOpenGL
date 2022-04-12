@@ -2,6 +2,7 @@
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
 
 namespace OpenGLHeart
 {
@@ -15,10 +16,10 @@ namespace OpenGLHeart
             //и матрица масштабирования
             //location - номер аргумента
 
-            layout(location = 0) in vec4 position;
+            layout(location = 0) in vec3 position;
             layout(location = 1) in vec3 normal;
 
-            uniform mat4 scaleMatrix;
+            uniform mat4 model;
 
             //Выходные данные
 
@@ -27,9 +28,10 @@ namespace OpenGLHeart
 
             void main(void)
             {
-                gl_Position = scaleMatrix * position;
+                gl_Position = vec4(position, 1.0) * model;
                 
-                frPos = vec3(scaleMatrix * position);
+                frPos = vec3(model * vec4(position, 1.0));
+
                 frNormal = normal;
             }
         ";
@@ -140,15 +142,15 @@ namespace OpenGLHeart
             GL.EnableVertexAttribArray(positionLocation);
             GL.EnableVertexAttribArray(normalLocation);
 
-            //Первым аргументом в шейдер по 4 float-а вершин (x,y,z,w) с шагом 7
+            //Первым аргументом в шейдер по 3 float-а вершин (x,y,z) с шагом 6
             //без смещения от начала
-            GL.VertexAttribPointer(positionLocation, 4, VertexAttribPointerType.Float,
-                    false, 7 * sizeof(float), 0);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float,
+                    false, 6 * sizeof(float), 0);
 
-            //Вторым аргументом в шейдер по 3 float-а вершин (x,y,z,w)
-            //с шагом 7 со смещением 4 от начала
+            //Вторым аргументом в шейдер по 3 float-а нормалей (x,y,z)
+            //с шагом 6 со смещением 3 от начала
             GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float,
-                    false, 7 * sizeof(float), 4 * sizeof(float));
+                    false, 6 * sizeof(float), 3 * sizeof(float));
             //------------------------------------------------------
 
             //Создание объекта-буфера элементов для треугольников
@@ -162,11 +164,13 @@ namespace OpenGLHeart
 
             //Настройка: отрисовывать только видимые грани
             GL.Enable(EnableCap.CullFace);
-            
-            //Более реалистичное освещение
+
+            //Настройка: проверка глубины
+            GL.Enable(EnableCap.DepthTest);
+
+            //Настройка: более реалистичное освещение
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlphaSaturate, BlendingFactorDest.One);
-
             base.OnLoad(e);
         }
 
@@ -190,7 +194,7 @@ namespace OpenGLHeart
 
         protected override void OnResize(EventArgs e)
         {
-            // Изменение размера viewport для его соответствия размеру окна
+            //Установка размера viewport для его соответствия размеру окна
             GL.Viewport(0, 0, Width, Height);
             base.OnResize(e);
         }
@@ -202,12 +206,15 @@ namespace OpenGLHeart
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            //Уменьшение на 1
+            KeyboardState input = Keyboard.GetState();
+            if (input.IsKeyDown(Key.Escape))
+                Exit();
+
             if (!upscaling)
                 iScale--;
-            //Увеличение на 1
             else
                 iScale++;
+
             if (iScale == 1700 || iScale == 2000)
                 upscaling = !upscaling;
 
@@ -218,6 +225,8 @@ namespace OpenGLHeart
 
             //Очистка цветового буфера
             GL.Clear(ClearBufferMask.ColorBufferBit);
+            //Очистка буфера глубины
+            GL.Clear(ClearBufferMask.DepthBufferBit);
 
             //Бинд VBO
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
@@ -229,12 +238,12 @@ namespace OpenGLHeart
             //Создание матрицы масштабирования
             Matrix4 scale = Matrix4.CreateScale(fScale, fScale, fScale);
 
-            Matrix4 rotation = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(iRot / 40.0f));
+            //Matrix4 rotation = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(iRot / 40.0f));
 
-            Matrix4 model = scale * rotation;
+            Matrix4 model = scale; //* rotation;
 
             //Привязка матрицы к шейдерной программе
-            int loc1 = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
+            int loc1 = GL.GetUniformLocation(ShaderProgram, "model");
             GL.UniformMatrix4(loc1, true, ref model);
 
             //Создание точки, откуда идёт освещение

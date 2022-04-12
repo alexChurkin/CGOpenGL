@@ -33,17 +33,16 @@ namespace OpenGLHeart
         //Первые 4 числа - описание вершины, следующие 3 - нормали, и т. д.
         public float[] ObtainVerticesWithNormals()
         {
-            float[] result = new float[vertices.Length * 7];
-            for (int i = 0, j = 0; i < vertices.Length; i++, j += 7)
+            float[] result = new float[vertices.Length * 6];
+            for (int i = 0, j = 0; i < vertices.Length; i++, j += 6)
             {
                 result[j] = vertices[i].x;
                 result[j + 1] = vertices[i].y;
                 result[j + 2] = vertices[i].z;
-                result[j + 3] = vertices[i].w;
 
-                result[j + 4] = normals[i].x;
-                result[j + 5] = normals[i].y;
-                result[j + 6] = normals[i].z;
+                result[j + 3] = normals[i].x;
+                result[j + 4] = normals[i].y;
+                result[j + 5] = normals[i].z;
             }
             return result;
         }
@@ -136,6 +135,4 @@ namespace OpenGLHeart
                 objTriangles.ToArray());
         }
     }
-
-
 }
