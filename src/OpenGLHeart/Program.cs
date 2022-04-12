@@ -15,7 +15,6 @@ namespace OpenGLHeart
             //и матрица масштабирования
             //location - номер аргумента
 
-            //КОРРЕКТНЫ
             layout(location = 0) in vec4 position;
             layout(location = 1) in vec3 normal;
 
@@ -28,11 +27,9 @@ namespace OpenGLHeart
 
             void main(void)
             {
-                vec4 worldCoords = scaleMatrix * position;
-
-                gl_Position = worldCoords;
+                gl_Position = scaleMatrix * position;
                 
-                frPos = vec3(worldCoords);
+                frPos = vec3(scaleMatrix * position);
                 frNormal = normal;
             }
         ";
@@ -99,6 +96,7 @@ namespace OpenGLHeart
         {
             ObjReader r = new ObjReader();
             ObjResource objRes = r.ReadObj("NiceHeart.obj");
+            //ObjResource objRes = r.ReadObj(@"C:\Users\lxchu\Desktop\old.obj");
 
             //Получение вершин в нужном для отрисовки формате
             VerticesWithNormals = objRes.ObtainVerticesWithNormals();
@@ -159,12 +157,13 @@ namespace OpenGLHeart
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementsBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, Elements.Length * sizeof(int), Elements, BufferUsageHint.StaticDraw);
 
-            //Очистка цвета (установка серого)
+            //Установка серого фона
             GL.ClearColor(0.15f, 0.15f, 0.15f, 0.0f);
 
+            //Настройка: отрисовывать только видимые грани
             GL.Enable(EnableCap.CullFace);
             
-            //Делает освещение интереснее
+            //Более реалистичное освещение
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlphaSaturate, BlendingFactorDest.One);
 
@@ -197,7 +196,9 @@ namespace OpenGLHeart
         }
 
         bool upscaling = false;
-        float iScale = 2000;
+        int iScale = 2000;
+
+        int iRot = 0;
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
@@ -212,6 +213,9 @@ namespace OpenGLHeart
 
             float fScale = iScale / 2000.0f;
 
+            iRot++;
+            if (iRot == 14400) iRot = 0;
+
             //Очистка цветового буфера
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
@@ -224,17 +228,28 @@ namespace OpenGLHeart
 
             //Создание матрицы масштабирования
             Matrix4 scale = Matrix4.CreateScale(fScale, fScale, fScale);
-            //Привязка матрицы ко входу шейдерной программы
-            int loc1 = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
-            GL.UniformMatrix4(loc1, true, ref scale);
 
-            //Создание вектора, задающего точку, откуда идёт освещение
-            Vector3 lightPos = new Vector3(2.0f, 0f, 2.0f);
-            //Привязка точки ко входу шейдерной программы
+            Matrix4 rotation = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(iRot / 40.0f));
+
+            Matrix4 model = scale * rotation;
+
+            //Привязка матрицы к шейдерной программе
+            int loc1 = GL.GetUniformLocation(ShaderProgram, "scaleMatrix");
+            GL.UniformMatrix4(loc1, true, ref model);
+
+            //Создание точки, откуда идёт освещение
+            Vector3 lightPos = new Vector3(2.0f, -1.0f, 2.0f);
+            //Привязка точки к шейдерной программе
             int loc2 = GL.GetUniformLocation(ShaderProgram, "lightPos");
             GL.Uniform3(loc2, ref lightPos);
 
-            //Использование ранее скомпилированной шейдерной программы
+            //Matrix4 viewMatrix = Matrix4.LookAt(new Vector3(0.0f, 0.0f, 0.9f),//откуда смотреть? (точка)
+            //new Vector3(0.0f, 0.0f, 0.0f),//куда смотреть? (точка)
+            //new Vector3(0.0f, 1f, 0.0f)); //вектор up (не трогать)
+            //int loc3 = GL.GetUniformLocation(ShaderProgram, "viewMatrix");
+            //GL.UniformMatrix4(loc3, true, ref viewMatrix);
+
+            //Использование уже скомпилированной шейдерной программы
             GL.UseProgram(ShaderProgram);
 
             //Отрисовка треугольников
