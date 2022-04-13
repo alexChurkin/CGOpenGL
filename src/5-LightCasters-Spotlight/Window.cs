@@ -33,7 +33,9 @@ namespace LearnOpenTK
         int ElementsBufferObject;
 
         private Vector3 startCameraPos = new Vector3(0.0f, 0.0f, 1.2f);
+
         private Vector3 currentSpotlightPos = new Vector3(0.0f, 0.0f, 1.2f);
+        private Vector3 currentSpotlightDir;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -84,7 +86,6 @@ namespace LearnOpenTK
             _camera = new Camera(startCameraPos, Size.X / (float)Size.Y);
 
             CursorGrabbed = true;
-            //WindowState = WindowState.Fullscreen;
         }
 
 
@@ -92,7 +93,7 @@ namespace LearnOpenTK
         int iScale = 2000;
 
         int iRot = 0;
-        bool lightFixed = false;
+        bool spotlightFixed = false;
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
@@ -114,12 +115,16 @@ namespace LearnOpenTK
             shadersPair.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
             shadersPair.SetFloat("material.shininess", 32.0f);
 
-            if(lightFixed)
+            if (spotlightFixed)
+            {
                 shadersPair.SetVector3("light.position", currentSpotlightPos);
+                shadersPair.SetVector3("light.direction", currentSpotlightDir);
+            }
             else
+            {
                 shadersPair.SetVector3("light.position", _camera.Position);
-
-            shadersPair.SetVector3("light.direction", _camera.Front);
+                shadersPair.SetVector3("light.direction", _camera.Front);
+            }
             shadersPair.SetFloat("light.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
             shadersPair.SetFloat("light.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(32.5f)));
             shadersPair.SetFloat("light.constant", 1.0f);
@@ -196,8 +201,12 @@ namespace LearnOpenTK
             }
             if (input.IsKeyPressed(Keys.F))
             {
-                lightFixed = !lightFixed;
-                if(lightFixed) currentSpotlightPos = _camera.Position;
+                spotlightFixed = !spotlightFixed;
+                if (spotlightFixed) {
+                    currentSpotlightPos = _camera.Position;
+                    currentSpotlightDir = _camera.Front;
+                }
+                
             }
 
             var mouse = MouseState;
