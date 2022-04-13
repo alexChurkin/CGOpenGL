@@ -100,8 +100,8 @@ namespace OpenGLHeart
         protected override void OnLoad(EventArgs e)
         {
             ObjReader r = new ObjReader();
-            //ObjResource objRes = r.ReadObj("NiceHeart.obj");
-            ObjResource objRes = r.ReadObj(@"C:\Users\lxchu\Desktop\cube.obj");
+            ObjResource objRes = r.ReadObj("NiceHeart.obj");
+            //ObjResource objRes = r.ReadObj(@"C:\Users\lxchu\Desktop\old.obj");
 
             //Получение вершин в нужном для отрисовки формате
             VerticesWithNormals = objRes.ObtainVerticesWithNormals();

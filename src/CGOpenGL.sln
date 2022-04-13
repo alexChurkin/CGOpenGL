@@ -5,6 +5,8 @@ VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGLHeart", "OpenGLHeart\OpenGLHeart.csproj", "{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "5-LightCasters-Spotlight", "5-LightCasters-Spotlight\5-LightCasters-Spotlight.csproj", "{406199C3-08AF-441C-80E9-8A1E4B097B7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{406199C3-08AF-441C-80E9-8A1E4B097B7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{406199C3-08AF-441C-80E9-8A1E4B097B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{406199C3-08AF-441C-80E9-8A1E4B097B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{406199C3-08AF-441C-80E9-8A1E4B097B7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
