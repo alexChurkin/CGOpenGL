@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGLHeart", "OpenGLHeart\OpenGLHeart.csproj", "{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_OldProject", "OpenGLHeart\_OldProject.csproj", "{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "5-LightCasters-Spotlight", "5-LightCasters-Spotlight\5-LightCasters-Spotlight.csproj", "{406199C3-08AF-441C-80E9-8A1E4B097B7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedHeart", "5-LightCasters-Spotlight\RedHeart.csproj", "{406199C3-08AF-441C-80E9-8A1E4B097B7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -45,7 +45,7 @@ namespace LearnOpenTK
             base.OnLoad();
 
             ObjReader r = new ObjReader();
-            ObjResource objRes = r.ReadObj(@"C:\Users\lxchu\Desktop\NiceHeart.obj");
+            ObjResource objRes = r.ReadObj("NiceHeart.obj");
 
             _vertices = objRes.ObtainVerticesWithNormals();
             _elements = objRes.triangles;
