@@ -6,17 +6,15 @@ using OpenTK.Mathematics;
 
 namespace LearnOpenTK.Common
 {
-    public class ShadersPair
+    public class ShaderProgram
     {
         public readonly int Handle;
         private readonly Dictionary<string, int> _uniformLocations;
 
-        public ShadersPair(string vertPath, string fragPath)
+        public ShaderProgram(string vertPath, string fragPath)
         {
             var shaderSource = File.ReadAllText(vertPath);
-
             var vertexShader = GL.CreateShader(ShaderType.VertexShader);
-
             GL.ShaderSource(vertexShader, shaderSource);
             CompileShader(vertexShader);
 
@@ -108,7 +106,8 @@ namespace LearnOpenTK.Common
         public void SetInt(string name, int data)
         {
             GL.UseProgram(Handle);
-            GL.Uniform1(_uniformLocations[name], data);
+            var smth = _uniformLocations[name];
+            GL.Uniform1(smth, data);
         }
 
         public void SetFloat(string name, float data)
