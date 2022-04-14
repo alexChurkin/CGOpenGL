@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace LearnOpenTK
+namespace RedHeart.ObjImport
 {
-    public class ObjResource
+    public class GL3DModel
     {
-        //Вершины объекта в виде списка
+        //Вершины модели в виде списка
         public Vertex[] vertices { get; set; }
-        //Нормали, соответствующие этим вершинам (в том же порядке)
+
+        //Нормали этих вершин (здесь - в том же порядке)
         public Normal[] normals { get; set; }
 
-        //Треугольники, представленные номерами вершин каждый
-        //в виде v11, v12, v13 <- первый треугольник
-        //       v21, v22, v23 <- следующий
+        //Треугольники, представленные списками вершин
+        //в виде v11, v12, v13, <- треугольник 1
+        //       v21, v22, v23, <- треугольник 2
         //       ...........
-        //       vk1, vk2, vk3 <- последний треугольник
+        //       vk1, vk2, vk3  <- треугольник k (последний)
         public int[] triangles { get; set; }
 
-        public ObjResource(Vertex[] vertices, Normal[] normals, int[] triangles)
+        public GL3DModel(Vertex[] vertices, Normal[] normals, int[] triangles)
         {
             this.vertices = vertices;
             this.normals = normals;
@@ -31,7 +32,7 @@ namespace LearnOpenTK
         //...........
         //xm, ym, zm, wm, nxn, nyn, nzn
         //Первые 4 числа - описание вершины, следующие 3 - нормали, и т. д.
-        public float[] ObtainVerticesWithNormals()
+        public float[] GetVerticesWithNormals()
         {
             float[] result = new float[vertices.Length * 6];
             for (int i = 0, j = 0; i < vertices.Length; i++, j += 6)
@@ -50,7 +51,7 @@ namespace LearnOpenTK
 
     public class ObjReader
     {
-        public ObjResource ReadObj(string path)
+        public GL3DModel ReadObj(string path)
         {
             List<Vertex> objVertices = new List<Vertex>();
             List<Normal> objNormals = new List<Normal>();
@@ -88,7 +89,8 @@ namespace LearnOpenTK
 
             //Массив нормалей к ним (уже отсортированный, каждой вершине нормаль)
             Normal[] normalsSorted = new Normal[objVertices.Count];
-            //Список треугольников
+
+            //Список треугольников (нумерация вершин с нуля)
             //Треугольники представлены списками вершин
             //в виде v11, v12, v13, <- треугольник 1
             //       v21, v22, v23, <- треугольник 2
@@ -129,7 +131,7 @@ namespace LearnOpenTK
                     objTriangles.Add(v3);
                 }
             }
-            return new ObjResource(
+            return new GL3DModel(
                 objVertices.ToArray(),
                 normalsSorted,
                 objTriangles.ToArray());

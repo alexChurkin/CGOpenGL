@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{82E18ED0-E9A4-4EF4-830C-AA497B8A70EF}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>OpenGLHeart</RootNamespace>
-    <AssemblyName>OpenGLHeart</AssemblyName>
+    <RootNamespace>_OldProject</RootNamespace>
+    <AssemblyName>_OldProject</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

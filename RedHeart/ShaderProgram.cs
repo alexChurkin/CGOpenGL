@@ -1,26 +1,23 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace LearnOpenTK.Common
+namespace RedHeart
 {
     public class ShaderProgram
     {
         public readonly int Handle;
         private readonly Dictionary<string, int> _uniformLocations;
 
-        public ShaderProgram(string vertPath, string fragPath)
+        public ShaderProgram(string vertexSource, string fragmentSource)
         {
-            var shaderSource = File.ReadAllText(vertPath);
             var vertexShader = GL.CreateShader(ShaderType.VertexShader);
-            GL.ShaderSource(vertexShader, shaderSource);
+            GL.ShaderSource(vertexShader, vertexSource);
             CompileShader(vertexShader);
 
-            shaderSource = File.ReadAllText(fragPath);
             var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
-            GL.ShaderSource(fragmentShader, shaderSource);
+            GL.ShaderSource(fragmentShader, fragmentSource);
             CompileShader(fragmentShader);
 
             // These two shaders must then be merged into a shader program, which can then be used by OpenGL.
@@ -92,7 +89,7 @@ namespace LearnOpenTK.Common
             }
         }
 
-        // A wrapper function that enables the shader program.
+        //Функция-обёртка для использования текущей шейдерной программы
         public void Use()
         {
             GL.UseProgram(Handle);

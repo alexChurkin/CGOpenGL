@@ -2,12 +2,13 @@
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
-namespace LearnOpenTK
+namespace RedHeart
 {
     public static class Program
     {
         private static void Main()
         {
+            //Установка настроек окна программы
             var nativeWindowSettings = new NativeWindowSettings()
             {
                 Size = new Vector2i(1024, 768),
@@ -15,7 +16,7 @@ namespace LearnOpenTK
                 //Для корректной работы на Mac OS
                 Flags = ContextFlags.ForwardCompatible,
             };
-
+            //запуск окна программы
             using var window = new Window(GameWindowSettings.Default, nativeWindowSettings);
             window.Run();
         }

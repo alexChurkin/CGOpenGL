@@ -1,4 +1,4 @@
-﻿namespace LearnOpenTK
+﻿namespace RedHeart.ObjImport
 {
     //Вершина
     public class Vertex

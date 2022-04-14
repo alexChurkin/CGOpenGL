@@ -171,9 +171,6 @@ namespace OpenGLHeart
             //Настройка: проверка глубины
             GL.Enable(EnableCap.DepthTest);
 
-            //Настройка: более реалистичное освещение
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlphaSaturate, BlendingFactorDest.One);
             base.OnLoad(e);
         }
 
