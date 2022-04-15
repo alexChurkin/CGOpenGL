@@ -29,13 +29,14 @@ namespace RedHeart
 
         //Переменные состояния:
         //Для масштабирования сердца
-        private bool upscaling = false;
-        private int iScale = 2000;
+        private float _scale = 1.0f;
+        private float _scaleSpeed = 0.3f;
+        private bool _isUpscaling = false;
         //И для поворота
-        private int iRot = 0;
+        private float _rotationDegrees = 0.0f;
 
         //Отвязанность прожектора от камеры
-        private bool spotlightFixed = false;
+        private bool _spotlightFixed = false;
 
         //Начальное положение камеры в мире
         private Vector3 _startCameraPos = new Vector3(0.0f, 0.0f, 1.2f);
@@ -125,7 +126,7 @@ namespace RedHeart
             //shaderProgram.SetInt("material.specular", 1);
             //shaderProgram.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
             shaderProgram.SetFloat("material.shininess", 50.0f);
-            if (spotlightFixed)
+            if (_spotlightFixed)
             {
                 shaderProgram.SetVector3("light.position", _currentSpotlightPos);
                 shaderProgram.SetVector3("light.direction", _currentSpotlightDir);
@@ -144,28 +145,10 @@ namespace RedHeart
             shaderProgram.SetVector3("light.diffuse", new Vector3(0.5f));
             shaderProgram.SetVector3("light.specular", new Vector3(1.0f));
 
-            if (!upscaling)
-                iScale--;
-            else
-                iScale++;
-
-            if (iScale == 1700 || iScale == 2000)
-                upscaling = !upscaling;
-            float fScale = iScale / 2000.0f;
-
-            iRot++;
-            if (iRot == 14400) iRot = 0;
-
-            //Отрисовка сердцав начале координат, затем
-            // We want to draw the heart at their respective position
-            // Then we translate said matrix by the cube position
-
             //Матрица модели - матрица для сердца в начале координат с заданным масштабированием и поворотом
-            Matrix4 model = 
-                Matrix4.CreateScale(fScale) * 
-                Matrix4.CreateRotationY(MathHelper.DegreesToRadians(iRot / 40.0f));
-
-            // Remember to set the model at last so it can be used by opentk
+            Matrix4 model =
+                Matrix4.CreateScale(_scale) * 
+                Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotationDegrees));
             shaderProgram.SetMatrix4("model", model);
 
             GL.DrawElements(
@@ -179,7 +162,6 @@ namespace RedHeart
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
-
             if (!IsFocused)
                 return;
 
@@ -195,30 +177,21 @@ namespace RedHeart
             const float sensitivity = 0.1f;
 
             if (input.IsKeyDown(Keys.W))
-            {
                 _camera.Position += _camera.Front * cameraSpeed * (float)e.Time;
-            }
             if (input.IsKeyDown(Keys.S))
-            {
                 _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time;
-            }
             if (input.IsKeyDown(Keys.A))
-            {
                 _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time;
-            }
             if (input.IsKeyDown(Keys.D))
-            {
                 _camera.Position += _camera.Right * cameraSpeed * (float)e.Time;
-            }
             if (input.IsKeyPressed(Keys.F))
             {
-                spotlightFixed = !spotlightFixed;
-                if (spotlightFixed)
+                _spotlightFixed = !_spotlightFixed;
+                if (_spotlightFixed)
                 {
                     _currentSpotlightPos = _camera.Position;
                     _currentSpotlightDir = _camera.Front;
                 }
-
             }
 
             //Обновление направления камеры исходя из передвижения мыши
@@ -238,6 +211,20 @@ namespace RedHeart
                 _camera.Yaw += deltaX * sensitivity;
                 _camera.Pitch -= deltaY * sensitivity;
             }
+
+
+            if (_scale <= 0.8f)
+                _isUpscaling = true;
+            if (_scale >= 0.999999f)
+                _isUpscaling = false;
+
+            if (_isUpscaling)
+                _scale += _scaleSpeed * (float)e.Time;
+            else
+                _scale -= _scaleSpeed * (float)e.Time;
+
+            _rotationDegrees += 10f * (float)e.Time;
+            if (_rotationDegrees >= 359.999) _rotationDegrees = 0.0f;
         }
 
         //Обновление поля зрения камеры по колесу мыши
