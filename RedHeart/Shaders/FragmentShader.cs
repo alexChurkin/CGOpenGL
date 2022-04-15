@@ -10,11 +10,12 @@
                 vec3 specular;
                 float shininess;
             };
-            //The spotlight is a pointlight in essence, however we only want to show the light within a certain angle.
+
+            //The spotlight is some pointlight when we only want to show the light within a certain angle.
             //That angle is the cutoff, the outercutoff is used to make a more smooth border to the spotlight.
             struct Light {
-                vec3  position;
-                vec3  direction;
+                vec3 position;
+                vec3 direction;
                 float cutOff;
                 float outerCutOff;
             
@@ -31,36 +32,36 @@
             uniform Material material;
             uniform vec3 viewPos;
             
-            out vec4 FragColor;
-            
-            in vec3 Normal;
             in vec3 FragPos;
+            in vec3 Normal;
+
+            out vec4 FragColor;
             
             void main()
             {
-                vec3 objectColor = vec3(1.0, 0.2, 0.4);
+                vec3 heartColor = vec3(1.0, 0.2, 0.4);
             
-                vec3 ambient = light.ambient * objectColor;
+                vec3 ambient = light.ambient * heartColor;
             
-                //diffuse 
+                //Diffuse
                 vec3 norm = normalize(Normal);
                 vec3 lightDir = normalize(light.position - FragPos);
                 float diff = max(dot(norm, lightDir), 0.0);
-                vec3 diffuse = light.diffuse * diff * objectColor;
+                vec3 diffuse = light.diffuse * diff * heartColor;
             
-                //specular
+                //Specular
                 vec3 viewDir = normalize(viewPos - FragPos);
                 vec3 reflectDir = reflect(-lightDir, norm);
                 float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-                vec3 specular = light.specular * spec * objectColor;
+                vec3 specular = light.specular * spec * heartColor;
             
-                //attenuation
+                //Attenuation
                 float distance    = length(light.position - FragPos);
                 float attenuation = 1.0 / (light.constant + light.linear * distance
                                         + light.quadratic * (distance * distance));
             
-                //spotlight intensity
-                //This is how we calculate the spotlight, for a more in depth explanation of how this works. Check out the web tutorials.
+                //Spotlight intensity
+                //This is how we calculate the spotlight
                 float theta     = dot(lightDir, normalize(-light.direction));
                 float epsilon   = light.cutOff - light.outerCutOff;
                 float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0); //The intensity, is the lights intensity on a given fragment,
@@ -70,6 +71,7 @@
                 diffuse  *= attenuation * intensity;
                 specular *= attenuation * intensity;
             
+                //Setting up our final color of this fragment
                 vec3 result = ambient + diffuse + specular;
                 FragColor = vec4(result, 1.0);
             }

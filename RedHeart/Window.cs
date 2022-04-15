@@ -18,7 +18,7 @@ namespace RedHeart
         private int _vertexBufferObject;
         private int _elementsBufferObject;
 
-        private ShaderProgram shaderProgram;
+        private ShaderProgram _shaderProgram;
 
         //Состояние мыши
         private bool _firstMove = true;
@@ -45,9 +45,7 @@ namespace RedHeart
         private Vector3 _currentSpotlightDir;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
-            : base(gameWindowSettings, nativeWindowSettings)
-        {
-        }
+            : base(gameWindowSettings, nativeWindowSettings) { }
 
         protected override void OnLoad()
         {
@@ -63,7 +61,7 @@ namespace RedHeart
             _elements = objRes.triangles;
 
             //Сборка шейдерной программы (компиляция и линковка двух шейдеров)
-            shaderProgram = new ShaderProgram(
+            _shaderProgram = new ShaderProgram(
                 VertexShader.text, FragmentShader.text);
 
             //Создание Vertex Array Object и его привязка
@@ -77,12 +75,12 @@ namespace RedHeart
                 _verticesAndNormals, BufferUsageHint.StaticDraw);
 
             //Указание OpenGL, где искать вершины в буфере вершин/нормалей
-            var positionLocation = shaderProgram.GetAttribLocation("vPos");
+            var positionLocation = _shaderProgram.GetAttribLocation("vPos");
             GL.EnableVertexAttribArray(positionLocation);
             GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
 
             //Указание OpenGL, где искать нормали в буфере вершин/нормалей
-            var normalLocation = shaderProgram.GetAttribLocation("vNormal");
+            var normalLocation = _shaderProgram.GetAttribLocation("vNormal");
             GL.EnableVertexAttribArray(normalLocation);
             GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
@@ -115,41 +113,40 @@ namespace RedHeart
             //Привязка буфера вершин
             GL.BindVertexArray(_vertexArrayObject);
             //Указание использовать данную шейдерную программу
-            shaderProgram.Use();
+            _shaderProgram.Use();
 
-            //Привязка входных данных через uniform-механизм
-            shaderProgram.SetMatrix4("view", _camera.GetViewMatrix());
-            shaderProgram.SetMatrix4("projection", _camera.GetProjectionMatrix());
-            shaderProgram.SetVector3("viewPos", _camera.Position);
+            //Привязка входных данных через uniform-переменные
+            _shaderProgram.SetMatrix4("view", _camera.GetViewMatrix());
+            _shaderProgram.SetMatrix4("projection", _camera.GetProjectionMatrix());
+            _shaderProgram.SetVector3("viewPos", _camera.Position);
 
             //shaderProgram.SetInt("material.diffuse", 0);
-            //shaderProgram.SetInt("material.specular", 1);
             //shaderProgram.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
-            shaderProgram.SetFloat("material.shininess", 50.0f);
+            _shaderProgram.SetFloat("material.shininess", 50.0f);
             if (_spotlightFixed)
             {
-                shaderProgram.SetVector3("light.position", _currentSpotlightPos);
-                shaderProgram.SetVector3("light.direction", _currentSpotlightDir);
+                _shaderProgram.SetVector3("light.position", _currentSpotlightPos);
+                _shaderProgram.SetVector3("light.direction", _currentSpotlightDir);
             }
             else
             {
-                shaderProgram.SetVector3("light.position", _camera.Position);
-                shaderProgram.SetVector3("light.direction", _camera.Front);
+                _shaderProgram.SetVector3("light.position", _camera.Position);
+                _shaderProgram.SetVector3("light.direction", _camera.Front);
             }
-            shaderProgram.SetFloat("light.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
-            shaderProgram.SetFloat("light.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(32.5f)));
-            shaderProgram.SetFloat("light.constant", 1.0f);
-            shaderProgram.SetFloat("light.linear", 0.09f);
-            shaderProgram.SetFloat("light.quadratic", 0.032f);
-            shaderProgram.SetVector3("light.ambient", new Vector3(0.2f));
-            shaderProgram.SetVector3("light.diffuse", new Vector3(0.5f));
-            shaderProgram.SetVector3("light.specular", new Vector3(1.0f));
+            _shaderProgram.SetFloat("light.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
+            _shaderProgram.SetFloat("light.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(32.5f)));
+            _shaderProgram.SetFloat("light.constant", 1.0f);
+            _shaderProgram.SetFloat("light.linear", 0.09f);
+            _shaderProgram.SetFloat("light.quadratic", 0.032f);
+            _shaderProgram.SetVector3("light.ambient", new Vector3(0.2f));
+            _shaderProgram.SetVector3("light.diffuse", new Vector3(0.5f));
+            _shaderProgram.SetVector3("light.specular", new Vector3(1.0f));
 
             //Матрица модели - матрица для сердца в начале координат с заданным масштабированием и поворотом
             Matrix4 model =
                 Matrix4.CreateScale(_scale) * 
                 Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotationDegrees));
-            shaderProgram.SetMatrix4("model", model);
+            _shaderProgram.SetMatrix4("model", model);
 
             GL.DrawElements(
                 PrimitiveType.Triangles,
@@ -171,7 +168,7 @@ namespace RedHeart
             if (input.IsKeyDown(Keys.Escape))
                 Close();
 
-            //Обновление значений масштаба и поворота
+            //Обновление значений масштаба...
             if (_scale <= 0.8f)
                 _isUpscaling = true;
             if (_scale >= 0.999999f)
@@ -182,6 +179,7 @@ namespace RedHeart
             else
                 _scale -= _scaleSpeed * (float)e.Time;
 
+            //и поворота
             _rotationDegrees += 10f * (float)e.Time;
             if (_rotationDegrees >= 359.999) _rotationDegrees = 0.0f;
 
@@ -208,7 +206,7 @@ namespace RedHeart
                 }
             }
 
-            //Обновление направления камеры исходя из передвижения мыши
+            
             var mouse = MouseState;
 
             if (_firstMove)
@@ -218,6 +216,7 @@ namespace RedHeart
             }
             else
             {
+                //Обновление камеры исходя из передвижений мыши
                 var deltaX = mouse.X - _lastMousePos.X;
                 var deltaY = mouse.Y - _lastMousePos.Y;
                 _lastMousePos = new Vector2(mouse.X, mouse.Y);
@@ -227,10 +226,11 @@ namespace RedHeart
             }
         }
 
-        //Обновление поля зрения камеры по колесу мыши
+        //Изменение угла обзора камеры по колесу мыши
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
             base.OnMouseWheel(e);
+
             _camera.Fov -= 2 * e.OffsetY;
         }
 

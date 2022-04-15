@@ -4,11 +4,16 @@
     <RootNamespace>RedHeart</RootNamespace>
     <AssemblyName>RedHeart</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <ApplicationIcon>red_heart_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="Resources/**" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Shaders/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="red_heart_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

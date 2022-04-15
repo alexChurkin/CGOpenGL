@@ -14,7 +14,7 @@ namespace RedHeart
                 Size = new Vector2i(1024, 768),
                 Title = "OpenGL Red Heart",
                 //Для корректной работы на Mac OS
-                Flags = ContextFlags.ForwardCompatible,
+                Flags = ContextFlags.ForwardCompatible
             };
             //Запуск окна программы
             using var window = new Window(GameWindowSettings.Default, nativeWindowSettings);
