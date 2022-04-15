@@ -12,84 +12,63 @@ namespace RedHeart
 
         public ShaderProgram(string vertexSource, string fragmentSource)
         {
+            //Компиляция вершинного шейдера
             var vertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertexShader, vertexSource);
             CompileShader(vertexShader);
 
+            //Компиляция фрагментного шейдера
             var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(fragmentShader, fragmentSource);
             CompileShader(fragmentShader);
 
-            // These two shaders must then be merged into a shader program, which can then be used by OpenGL.
-            // To do this, create a program...
+            //Их прикрепление и линковка - создание шейдерной программы
             Handle = GL.CreateProgram();
-
-            // Attach both shaders...
             GL.AttachShader(Handle, vertexShader);
             GL.AttachShader(Handle, fragmentShader);
-
-            // And then link them together.
             LinkProgram(Handle);
 
-            // When the shader program is linked, it no longer needs the individual shaders attached to it; the compiled code is copied into the shader program.
-            // Detach them, and then delete them.
+            //Открепление и удаление использованных шейдеров,
+            //поскольку шейдерная программа уже скомпилирована и содержит всё необходимое
             GL.DetachShader(Handle, vertexShader);
             GL.DetachShader(Handle, fragmentShader);
             GL.DeleteShader(fragmentShader);
             GL.DeleteShader(vertexShader);
 
-            // The shader is now ready to go, but first, we're going to cache all the shader uniform locations.
-            // Querying this from the shader is very slow, so we do it once on initialization and reuse those values
-            // later.
-
-            // First, we have to get the number of active uniforms in the shader.
+            //Запись всех uniform-переменных из шейдеров в словарь
+            //(словарь содержит имена переменных и хэндлы на них)
             GL.GetProgram(Handle, GetProgramParameterName.ActiveUniforms, out var numberOfUniforms);
-
-            // Next, allocate the dictionary to hold the locations.
             _uniformLocations = new Dictionary<string, int>();
-
-            // Loop over all the uniforms,
-            for (var i = 0; i < numberOfUniforms; i++)
+            for (int i = 0; i < numberOfUniforms; i++)
             {
-                // get the name of this uniform,
-                var key = GL.GetActiveUniform(Handle, i, out _, out _);
-
-                // get the location,
-                var location = GL.GetUniformLocation(Handle, key);
-
-                // and then add it to the dictionary.
+                string key = GL.GetActiveUniform(Handle, i, out _, out _);
+                int location = GL.GetUniformLocation(Handle, key);
                 _uniformLocations.Add(key, location);
             }
         }
 
         private static void CompileShader(int shader)
         {
-            // Try to compile the shader
+            //Попытка компиляции шейдера
             GL.CompileShader(shader);
-            // Check for compilation errors
+            //Проверка наличия ошибок компиляции
             GL.GetShader(shader, ShaderParameter.CompileStatus, out var code);
             if (code != (int)All.True)
-            {
-                // We can use `GL.GetShaderInfoLog(shader)` to get information about the error.
-                var infoLog = GL.GetShaderInfoLog(shader);
-                throw new Exception($"Error occurred whilst compiling Shader({shader}).\n\n{infoLog}");
-            }
+                throw new Exception($"Ошибка компиляции шейдера {shader}:\n" +
+                    $"{GL.GetShaderInfoLog(shader)}");
         }
 
         private static void LinkProgram(int program)
         {
-            // We link the program
+            //Попытка линковки шейдерной программы
             GL.LinkProgram(program);
-            // Check for linking errors
+            //Проверка наличия ошибок при линковке
             GL.GetProgram(program, GetProgramParameterName.LinkStatus, out var code);
             if (code != (int)All.True)
-            {
-                // We can use `GL.GetProgramInfoLog(program)` to get information about the error.
-                throw new Exception($"Error occurred whilst linking Program({program})");
-            }
+                throw new Exception($"Ошибка линковки программы {program}");
         }
 
-        //Функция-обёртка для использования текущей шейдерной программы
+        //Функции-обёртки для удобства использования шейдерной программы
         public void Use()
         {
             GL.UseProgram(Handle);
@@ -103,8 +82,7 @@ namespace RedHeart
         public void SetInt(string name, int data)
         {
             GL.UseProgram(Handle);
-            var smth = _uniformLocations[name];
-            GL.Uniform1(smth, data);
+            GL.Uniform1(_uniformLocations[name], data);
         }
 
         public void SetFloat(string name, float data)

@@ -77,12 +77,12 @@ namespace RedHeart
                 _verticesAndNormals, BufferUsageHint.StaticDraw);
 
             //Указание OpenGL, где искать вершины в буфере вершин/нормалей
-            var positionLocation = shaderProgram.GetAttribLocation("aPos");
+            var positionLocation = shaderProgram.GetAttribLocation("vPos");
             GL.EnableVertexAttribArray(positionLocation);
             GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
 
             //Указание OpenGL, где искать нормали в буфере вершин/нормалей
-            var normalLocation = shaderProgram.GetAttribLocation("aNormal");
+            var normalLocation = shaderProgram.GetAttribLocation("vNormal");
             GL.EnableVertexAttribArray(normalLocation);
             GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
@@ -171,7 +171,21 @@ namespace RedHeart
             if (input.IsKeyDown(Keys.Escape))
                 Close();
 
-            //Обработка нажатия клавиш
+            //Обновление значений масштаба и поворота
+            if (_scale <= 0.8f)
+                _isUpscaling = true;
+            if (_scale >= 0.999999f)
+                _isUpscaling = false;
+
+            if (_isUpscaling)
+                _scale += _scaleSpeed * (float)e.Time;
+            else
+                _scale -= _scaleSpeed * (float)e.Time;
+
+            _rotationDegrees += 10f * (float)e.Time;
+            if (_rotationDegrees >= 359.999) _rotationDegrees = 0.0f;
+
+            //Обработка нажатий клавиш
             //(в том числе вычисление нового положения камеры перед следующим кадром)
             const float cameraSpeed = 1.5f;
             const float sensitivity = 0.1f;
@@ -211,20 +225,6 @@ namespace RedHeart
                 _camera.Yaw += deltaX * sensitivity;
                 _camera.Pitch -= deltaY * sensitivity;
             }
-
-
-            if (_scale <= 0.8f)
-                _isUpscaling = true;
-            if (_scale >= 0.999999f)
-                _isUpscaling = false;
-
-            if (_isUpscaling)
-                _scale += _scaleSpeed * (float)e.Time;
-            else
-                _scale -= _scaleSpeed * (float)e.Time;
-
-            _rotationDegrees += 10f * (float)e.Time;
-            if (_rotationDegrees >= 359.999) _rotationDegrees = 0.0f;
         }
 
         //Обновление поля зрения камеры по колесу мыши

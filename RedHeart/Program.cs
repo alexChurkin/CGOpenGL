@@ -16,8 +16,9 @@ namespace RedHeart
                 //Для корректной работы на Mac OS
                 Flags = ContextFlags.ForwardCompatible,
             };
-            //запуск окна программы
+            //Запуск окна программы
             using var window = new Window(GameWindowSettings.Default, nativeWindowSettings);
+            window.VSync = VSyncMode.On;
             window.Run();
         }
     }
