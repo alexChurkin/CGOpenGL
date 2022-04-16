@@ -32,7 +32,7 @@ namespace RedHeart
         private float _scale = 1.0f;
         private float _scaleSpeed = 0.3f;
         private bool _isUpscaling = false;
-        //И для поворота
+        //и для поворота
         private float _rotationDegrees = 0.0f;
 
         //Отвязанность прожектора от камеры
@@ -42,6 +42,7 @@ namespace RedHeart
         private Vector3 _startCameraPos = new Vector3(0.0f, 0.0f, 1.2f);
         //Текущее положение 
         private Vector3 _currentSpotlightPos = new Vector3(0.0f, 0.0f, 1.2f);
+        //Направление прожектора в данный момент
         private Vector3 _currentSpotlightDir;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
@@ -116,13 +117,20 @@ namespace RedHeart
             _shaderProgram.Use();
 
             //Привязка входных данных через uniform-переменные
+            //(матрица модели - матрица для сердца в начале координат с заданным масштабированием и поворотом)
+            Matrix4 model =
+                Matrix4.CreateScale(_scale) *
+                Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotationDegrees));
+
+            _shaderProgram.SetMatrix4("model", model);
+            //(матрица переходв в пространство вида - "eye space")
             _shaderProgram.SetMatrix4("view", _camera.GetViewMatrix());
+            //(матрица проекции на систему координат от -1 до 1 по x и y)
             _shaderProgram.SetMatrix4("projection", _camera.GetProjectionMatrix());
+            //(позиция наблюдателя)
             _shaderProgram.SetVector3("viewPos", _camera.Position);
 
-            //shaderProgram.SetInt("material.diffuse", 0);
-            //shaderProgram.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
-            _shaderProgram.SetFloat("material.shininess", 50.0f);
+            //(параметры света)
             if (_spotlightFixed)
             {
                 _shaderProgram.SetVector3("light.position", _currentSpotlightPos);
@@ -135,18 +143,18 @@ namespace RedHeart
             }
             _shaderProgram.SetFloat("light.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
             _shaderProgram.SetFloat("light.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(32.5f)));
+            _shaderProgram.SetVector3("light.ambient", new Vector3(0.2f));
+            _shaderProgram.SetVector3("light.diffuse", new Vector3(0.7f));
+            _shaderProgram.SetVector3("light.specular", new Vector3(1.0f));
             _shaderProgram.SetFloat("light.constant", 1.0f);
             _shaderProgram.SetFloat("light.linear", 0.09f);
             _shaderProgram.SetFloat("light.quadratic", 0.032f);
-            _shaderProgram.SetVector3("light.ambient", new Vector3(0.2f));
-            _shaderProgram.SetVector3("light.diffuse", new Vector3(0.5f));
-            _shaderProgram.SetVector3("light.specular", new Vector3(1.0f));
 
-            //Матрица модели - матрица для сердца в начале координат с заданным масштабированием и поворотом
-            Matrix4 model =
-                Matrix4.CreateScale(_scale) * 
-                Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotationDegrees));
-            _shaderProgram.SetMatrix4("model", model);
+            //(свойства материала)
+            _shaderProgram.SetVector3("material.ambient", new Vector3(1f));
+            _shaderProgram.SetVector3("material.diffuse", new Vector3(1f));
+            _shaderProgram.SetVector3("material.specular", new Vector3(0.5f));
+            _shaderProgram.SetFloat("material.shininess", 48.0f);
 
             GL.DrawElements(
                 PrimitiveType.Triangles,

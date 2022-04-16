@@ -1,0 +1,10 @@
+Learning:
+https://learnopengl.com/
+https://opentk.net/learn/
+
+GitHub repo with some examples:
+https://github.com/opentk/LearnOpenTK
+
+Properties of some materials:
+http://devernay.free.fr/cours/opengl/materials.html
+(from https://habr.com/ru/post/336166/)
