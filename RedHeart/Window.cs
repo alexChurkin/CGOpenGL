@@ -27,13 +27,16 @@ namespace RedHeart
         //Состояние камеры
         private Camera _camera;
 
-        //Переменные состояния:
+        /* Переменные состояния: */
+
         //Для масштабирования сердца
         private float _scale = 1.0f;
         private float _scaleSpeed = 0.3f;
         private bool _isUpscaling = false;
-        //и для поворота
+        //для поворота
         private float _rotationDegrees = 0.0f;
+        //и номера материала
+        int matId = 0;
 
         //Отвязанность прожектора от камеры
         private bool _spotlightFixed = false;
@@ -150,11 +153,30 @@ namespace RedHeart
             _shaderProgram.SetFloat("light.linear", 0.09f);
             _shaderProgram.SetFloat("light.quadratic", 0.032f);
 
+
+
             //(свойства материала)
-            _shaderProgram.SetVector3("material.ambient", new Vector3(1f));
-            _shaderProgram.SetVector3("material.diffuse", new Vector3(1f));
-            _shaderProgram.SetVector3("material.specular", new Vector3(0.5f));
-            _shaderProgram.SetFloat("material.shininess", 48.0f);
+            //Цвет сам по себе
+            _shaderProgram.SetVector3("material.ambient", MatStorage.materials[matId].Ambient);
+            //Цвет под рассеянным освещением
+            _shaderProgram.SetVector3("material.diffuse", MatStorage.materials[matId].Diffuse);
+            //Цвет блика
+            _shaderProgram.SetVector3("material.specular", MatStorage.materials[matId].Specular);
+            //Сила блеска
+            _shaderProgram.SetFloat("material.shininess", MatStorage.materials[matId].Shininess);
+
+            //Gold material
+            //_shaderProgram.SetVector3("material.ambient", new Vector3(0.24725f, 0.1995f, 0.0745f));
+            //_shaderProgram.SetVector3("material.diffuse", new Vector3(0.75164f, 0.60648f, 0.22648f));
+            //_shaderProgram.SetVector3("material.specular", new Vector3(0.628281f, 0.555802f, 0.366065f));
+            //_shaderProgram.SetFloat("material.shininess", 0.4f * 128.0f);
+
+            //Green emerald material
+            //_shaderProgram.SetVector3("material.ambient", new Vector3(0.0215f, 0.1745f, 0.0215f));
+            //_shaderProgram.SetVector3("material.diffuse", new Vector3(0.07568f, 0.61424f, 0.07568f));
+            //_shaderProgram.SetVector3("material.specular", new Vector3(0.633f, 0.727811f, 0.633f));
+            //_shaderProgram.SetFloat("material.shininess", 0.6f * 128.0f);
+
 
             GL.DrawElements(
                 PrimitiveType.Triangles,
@@ -196,14 +218,23 @@ namespace RedHeart
             const float cameraSpeed = 1.5f;
             const float sensitivity = 0.1f;
 
+            float speedMultiplier = 1.0f;
+
+            if (input.IsKeyDown(Keys.LeftShift))
+                speedMultiplier = 2.0f;
+
             if (input.IsKeyDown(Keys.W))
-                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time;
+                _camera.Position += _camera.Front * cameraSpeed
+                    * speedMultiplier * (float)e.Time;
             if (input.IsKeyDown(Keys.S))
-                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time;
+                _camera.Position -= _camera.Front * cameraSpeed
+                    * speedMultiplier* (float)e.Time;
             if (input.IsKeyDown(Keys.A))
-                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time;
+                _camera.Position -= _camera.Right * cameraSpeed
+                    * speedMultiplier * (float)e.Time;
             if (input.IsKeyDown(Keys.D))
-                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time;
+                _camera.Position += _camera.Right * cameraSpeed
+                    * speedMultiplier * (float)e.Time;
             if (input.IsKeyPressed(Keys.F))
             {
                 _spotlightFixed = !_spotlightFixed;
@@ -214,6 +245,7 @@ namespace RedHeart
                 }
             }
 
+            if (input.IsKeyPressed(Keys.M)) matId = (matId + 1) % MatStorage.MaterialsCount;
             
             var mouse = MouseState;
 

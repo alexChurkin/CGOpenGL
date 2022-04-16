@@ -24,7 +24,7 @@
         public static readonly string text = @"
             #version 330
             
-            struct Material {
+            struct HeartMaterial {
                 vec3 ambient;
                 vec3 diffuse;
                 vec3 specular;
@@ -47,7 +47,7 @@
             };
             
             uniform Light light;
-            uniform Material material;
+            uniform HeartMaterial material;
             uniform vec3 viewPos;
             
             in vec3 FragPos;
@@ -57,31 +57,27 @@
             
             void main()
             {
+                //TODO remove
                 vec3 heartColor = vec3(1.0, 0.2, 0.4);
 
                 /*Light calculations:*/
 
                 //1. Ambient component
-                vec3 ambient = light.ambient * heartColor;
+                vec3 ambient = light.ambient * material.ambient;
 
-                ambient *= material.ambient;
             
                 //2. Diffuse component
                 vec3 norm = normalize(Normal);
                 //(Direction of the light - a difference vector between the light's position and the fragment's position)
                 vec3 lightDir = normalize(light.position - FragPos);
                 float diff = max(dot(norm, lightDir), 0.0);
-                vec3 diffuse = light.diffuse * diff * heartColor;
-
-                diffuse *= material.diffuse;
+                vec3 diffuse = light.diffuse * (diff * material.diffuse);
             
                 //3. Specular component
                 vec3 viewDir = normalize(viewPos - FragPos);
                 vec3 reflectDir = reflect(-lightDir, norm);
                 float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-                vec3 specular = light.specular * spec * heartColor;
-
-                specular *= material.specular;
+                vec3 specular = light.specular * (spec * material.specular);
             
                 //4. Attenuation
                 float distance    = length(light.position - FragPos);

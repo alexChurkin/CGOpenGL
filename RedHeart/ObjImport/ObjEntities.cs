@@ -1,7 +1,7 @@
 ﻿namespace RedHeart.ObjImport
 {
     //Вершина
-    public class Vertex
+    public struct Vertex
     {
         public float x { get; set; }
         public float y { get; set; }
@@ -21,7 +21,7 @@
     }
 
     //Нормаль
-    public class Normal
+    public struct Normal
     {
         public float x { get; set; }
         public float y { get; set; }
