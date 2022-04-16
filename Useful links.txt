@@ -8,3 +8,6 @@ https://github.com/opentk/LearnOpenTK
 Properties of some materials:
 http://devernay.free.fr/cours/opengl/materials.html
 (from https://habr.com/ru/post/336166/)
+
+Flat, Gouraud and Phong shading model:
+https://graphicscompendium.com/opengl/17-lighting-3
