@@ -107,6 +107,19 @@ namespace RedHeart
             CursorGrabbed = true;
         }
 
+        protected override void OnUnload()
+        {
+            //Отвязка всех ресурсов - установка в 0/null
+            GL.BindVertexArray(0);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            GL.UseProgram(0);
+            //Очистка всех ресурсов
+            GL.DeleteVertexArray(_vertexArrayObject);
+            GL.DeleteBuffer(_vertexBufferObject);
+            GL.DeleteBuffer(_elementsBufferObject);
+        }
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);

@@ -27,10 +27,10 @@ namespace RedHeart.ObjImport
         }
 
         //Получение всех вершин с их нормалями в формате:
-        //x1, y1, z1, w1, nx1, ny1, nz1,
-        //x2, y2, z2, w2, nx2, ny2, nz2,
+        //x1, y1, z1, nx1, ny1, nz1,
+        //x2, y2, z2, nx2, ny2, nz2,
         //...........
-        //xm, ym, zm, wm, nxn, nyn, nzn
+        //xm, ym, zm, nxn, nyn, nzn
         //Первые 4 числа - описание вершины, следующие 3 - нормали, и т. д.
         public float[] GetVerticesWithNormals()
         {
