@@ -5,7 +5,7 @@ namespace RedHeart
 {
     public class Camera
     {
-        //Векторы, задающие направления относительно положения камеры
+        //Векторы, задающие направления осей координат для камеры
         private Vector3 _front = -Vector3.UnitZ;
         private Vector3 _up = Vector3.UnitY;
         private Vector3 _right = Vector3.UnitX;
@@ -73,19 +73,19 @@ namespace RedHeart
             }
         }
 
-        // Get the view matrix using the amazing LookAt function described more in depth on the web tutorials
+        //Получение матрицы отображения с помощью функции LookAt
         public Matrix4 GetViewMatrix()
         {
             return Matrix4.LookAt(Position, Position + _front, _up);
         }
 
-        // Get the projection matrix using the same method we have used up until this point
+        //Получение матрицы проекции
         public Matrix4 GetProjectionMatrix()
         {
             return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
         }
 
-        // This function is going to update the direction vertices using some of the math learned in the web tutorials.
+        //Обновляет вектора направления камеры
         private void UpdateVectors()
         {
             //Вычислим вектор "вперёд" для камеры
