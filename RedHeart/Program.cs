@@ -11,7 +11,7 @@ namespace RedHeart
             //Установка настроек окна программы
             var nativeWindowSettings = new NativeWindowSettings()
             {
-                Size = new Vector2i(1920, 1080),
+                Size = new Vector2i(1024, 768),
                 Title = "OpenGL Red Heart",
                 //Для корректной работы на Mac OS
                 Flags = ContextFlags.ForwardCompatible
