@@ -178,19 +178,6 @@ namespace RedHeart
             //Сила блеска
             _shaderProgram.SetFloat("material.shininess", MatStorage.materials[matId].Shininess);
 
-            //Gold material
-            //_shaderProgram.SetVector3("material.ambient", new Vector3(0.24725f, 0.1995f, 0.0745f));
-            //_shaderProgram.SetVector3("material.diffuse", new Vector3(0.75164f, 0.60648f, 0.22648f));
-            //_shaderProgram.SetVector3("material.specular", new Vector3(0.628281f, 0.555802f, 0.366065f));
-            //_shaderProgram.SetFloat("material.shininess", 0.4f * 128.0f);
-
-            //Green emerald material
-            //_shaderProgram.SetVector3("material.ambient", new Vector3(0.0215f, 0.1745f, 0.0215f));
-            //_shaderProgram.SetVector3("material.diffuse", new Vector3(0.07568f, 0.61424f, 0.07568f));
-            //_shaderProgram.SetVector3("material.specular", new Vector3(0.633f, 0.727811f, 0.633f));
-            //_shaderProgram.SetFloat("material.shininess", 0.6f * 128.0f);
-
-
             GL.DrawElements(
                 PrimitiveType.Triangles,
                 _elements.Length,
